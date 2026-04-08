@@ -1,38 +1,39 @@
-/* 1. THE FOUNDATION */
+/* 1. THE FOUNDATION & VARIABLES */
 :root {
-    --glass: rgba(255, 255, 255, 0.1);
-    --border: rgba(255, 255, 255, 0.2);
+    --glass: rgba(255, 255, 255, 0.15);
+    --border: rgba(255, 255, 255, 0.1);
     --accent: #00f2ea; /* Neon Teal */
     --pink: #ff0050;   /* TikTok Pink */
-    --bg-dark: #000000;
+    --ig-dark: #121212; /* Instagram Background Dark */
 }
 
 body {
     margin: 0;
-    background: var(--bg-dark);
+    background: #000;
     color: #fff;
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     display: flex;
     justify-content: center;
-    overflow: hidden; /* Prevent the whole page from scrolling */
+    overflow: hidden; /* Prevent body scroll, only the feed scrolls */
+    height: 100vh;
 }
 
-/* 2. THE MOBILE CONTAINER */
+/* 2. THE APP WRAPPER */
 #app {
     width: 100%;
-    max-width: 450px; /* Keeps the TikTok "phone" look on desktop */
+    max-width: 450px; /* Locks it to a phone shape on desktop */
     height: 100vh;
     position: relative;
     background: #000;
-    border-left: 1px solid var(--border);
-    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
 }
 
-/* 3. TIKTOK-STYLE SCROLLING */
+/* 3. TIKTOK SCROLLING (THE FEED) */
 #feed {
-    height: 100%;
+    flex: 1;
     overflow-y: scroll;
-    scroll-snap-type: y mandatory; /* This creates the "snap" effect */
+    scroll-snap-type: y mandatory; /* The "Snap" effect */
     scrollbar-width: none; 
 }
 
@@ -41,36 +42,59 @@ body {
 }
 
 .post {
-    height: 100%;
+    height: 100vh; /* Each post is exactly one screen high */
     width: 100%;
-    scroll-snap-align: start; /* Locks each post to the top of the screen */
+    scroll-snap-align: start;
     position: relative;
-    display: flex;
-    align-items: center;
-    background: #111;
+    background: var(--ig-dark);
 }
 
 video {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Ensures video fills the screen without stretching */
+    object-fit: cover; /* Video fills the entire screen */
 }
 
-/* 4. GLASSMORPHISM SIDEBAR (Instagram Style) */
+/* 4. OVERLAYS (GLASSMORPHISM) */
+header {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    padding: 45px 0 20px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    z-index: 10;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+}
+
+header span {
+    font-weight: 600;
+    font-size: 0.9rem;
+    opacity: 0.6;
+}
+
+header span.active {
+    opacity: 1;
+    border-bottom: 2px solid #fff;
+}
+
+/* TikTok-Style Sidebar */
 .sidebar {
     position: absolute;
     right: 12px;
-    bottom: 110px;
+    bottom: 160px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    z-index: 10;
+    gap: 20px;
+    z-index: 5;
+    align-items: center;
 }
 
 .action-btn {
     background: var(--glass);
-    backdrop-filter: blur(12px); /* The "blurry" glass look */
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(15px); /* The "Instagram" blur look */
+    -webkit-backdrop-filter: blur(15px);
     border: 1px solid var(--border);
     width: 48px;
     height: 48px;
@@ -78,69 +102,29 @@ video {
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    font-size: 1.3rem;
-    transition: transform 0.2s, background 0.3s;
+    font-size: 1.4rem;
 }
 
-.action-btn:active {
-    transform: scale(0.9);
-    background: var(--border);
-}
-
-/* 5. OVERLAYS (Captions & Headers) */
-header {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    padding: 25px 0;
+/* 5. HYBRID BOTTOM NAVIGATION */
+.bottom-nav {
+    height: 75px;
+    background: #000;
     display: flex;
-    justify-content: center;
-    gap: 25px;
-    z-index: 10;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
-}
-
-.details {
-    position: absolute;
-    bottom: 25px;
-    left: 15px;
-    right: 80px;
-    z-index: 5;
-    text-shadow: 1px 1px 5px rgba(0,0,0,0.8);
-}
-
-.username {
-    font-weight: 800;
-    font-size: 1.1rem;
-    margin-bottom: 6px;
-    color: var(--accent);
-}
-
-.caption {
-    font-size: 0.95rem;
-    line-height: 1.4;
-    color: #efefef;
-}
-
-/* 6. UPLOAD BUTTON DESIGN */
-.upload-area {
-    position: absolute;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid var(--border);
     z-index: 20;
 }
 
-#upload-btn {
-    background: linear-gradient(45deg, var(--accent), var(--pink));
-    color: #fff;
-    border: none;
-    padding: 12px 28px;
-    border-radius: 50px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+.center-post {
+    background: linear-gradient(to right, var(--accent) 15%, var(--pink) 85%);
+    width: 42px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: 900;
+    font-size: 1.2rem;
 }
