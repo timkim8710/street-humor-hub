@@ -38,7 +38,7 @@
             flex-direction: column;
         }
 
-        /* TikTok Style Snapping Feed */
+        /* Feed Snapping */
         #feed {
             flex: 1;
             overflow-y: scroll;
@@ -55,13 +55,9 @@
             background: var(--ig-dark);
         }
 
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        video { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Instagram-Style Header */
+        /* Overlays */
         header {
             position: absolute;
             top: 0;
@@ -74,10 +70,6 @@
             background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
         }
 
-        header span { font-weight: 600; font-size: 0.9rem; opacity: 0.6; cursor: pointer; }
-        header span.active { opacity: 1; border-bottom: 2px solid #fff; }
-
-        /* TikTok Sidebar Actions */
         .sidebar {
             position: absolute;
             right: 12px;
@@ -89,18 +81,9 @@
             align-items: center;
         }
 
-        .user-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            border: 2px solid var(--accent);
-            background: #333;
-        }
-
         .action-btn {
             background: var(--glass);
             backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--border);
             width: 48px;
             height: 48px;
@@ -111,7 +94,6 @@
             font-size: 1.4rem;
         }
 
-        /* IG-Style Details */
         .details {
             position: absolute;
             bottom: 100px;
@@ -120,10 +102,9 @@
             z-index: 5;
         }
 
-        .username { font-weight: 700; margin-bottom: 5px; font-size: 1rem; }
-        .caption { font-size: 0.9rem; line-height: 1.4; color: #eee; }
+        .username { font-weight: 700; color: var(--accent); }
 
-        /* Hybrid Bottom Nav */
+        /* Bottom Nav */
         .bottom-nav {
             height: 75px;
             background: #000;
@@ -134,9 +115,8 @@
             z-index: 20;
         }
 
-        .nav-item { font-size: 1.4rem; cursor: pointer; opacity: 0.8; }
         .center-post {
-            background: linear-gradient(to right, var(--accent) 15%, var(--pink) 85%);
+            background: linear-gradient(to right, var(--accent), var(--pink));
             width: 42px;
             height: 28px;
             border-radius: 8px;
@@ -145,49 +125,71 @@
             justify-content: center;
             color: #000;
             font-weight: 900;
-            font-size: 1.2rem;
         }
 
-        #status-msg {
+        /* Editor Overlay */
+        #editor {
+            display: none;
             position: absolute;
-            bottom: 85px;
-            width: 100%;
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--accent);
-            z-index: 30;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
+
+        .music-chip {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .music-chip.active { background: var(--accent); color: #000; }
+
     </style>
 </head>
 <body>
 
 <div id="app">
     <header>
-        <span class="active">Trending</span>
-        <span>Local</span>
+        <span class="active">Humor</span>
+        <span style="opacity: 0.5;">Fresh</span>
     </header>
 
     <div id="feed">
         <div class="post">
             <div style="padding: 50px; text-align: center; margin-top: 50%;">
                 <h2>Street Humor Hub</h2>
-                <p>Sign in with Google to start viewing and posting!</p>
-                <button id="login-btn" style="padding: 10px 20px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer;">Sign In</button>
+                <button id="login-btn" style="padding: 10px 20px; border-radius: 20px; background: #fff; color: #000; border: none; font-weight: bold;">Sign In</button>
             </div>
         </div>
     </div>
 
-    <div id="status-msg"></div>
+    <div id="editor">
+        <h3 style="color: var(--accent);">Edit Vibe</h3>
+        <video id="preview" style="width: 200px; height: 320px; border-radius: 12px; object-fit: cover;" muted autoplay loop></video>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; margin: 20px 0;">
+            <div class="music-chip active" onclick="setMusic('None', this)">No Music</div>
+            <div class="music-chip" onclick="setMusic('Meru Drill', this)">🔥 Meru Drill</div>
+            <div class="music-chip" onclick="setMusic('Maua Flow', this)">🎤 Maua Flow</div>
+        </div>
+        <button id="post-now" class="center-post" style="width: 150px; height: 45px; border-radius: 25px;">POST NOW</button>
+        <p onclick="document.getElementById('editor').style.display='none'" style="margin-top: 15px; font-size: 0.9rem; opacity: 0.7;">Cancel</p>
+    </div>
 
     <nav class="bottom-nav">
-        <div class="nav-item">🏠</div>
-        <div class="nav-item">🔍</div>
-        <div class="center-post" id="post-trigger">+</div>
-        <div class="nav-item">💬</div>
-        <div class="nav-item">👤</div>
+        <div>🏠</div>
+        <div id="post-trigger" class="center-post">+</div>
+        <div>👤</div>
     </nav>
 
     <input type="file" id="video-input" accept="video/*" style="display: none;">
+    <div id="status-msg" style="position: absolute; bottom: 85px; width: 100%; text-align: center; font-size: 0.8rem; color: var(--accent);"></div>
 </div>
 
 <script type="module">
@@ -196,7 +198,6 @@
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // Your Config
     const firebaseConfig = {
         apiKey: "AIzaSyCXArPj4WErtRkb2qfaDueaWZm9tdAbSGI",
         authDomain: "street-humor-hub.firebaseapp.com",
@@ -213,81 +214,83 @@
     const provider = new GoogleAuthProvider();
 
     let currentUser = null;
+    let selectedFile = null;
+    let selectedMusic = "None";
 
-    // --- AUTH ---
+    // AUTH
     const loginBtn = document.getElementById('login-btn');
-    if(loginBtn) loginBtn.onclick = () => signInWithPopup(auth, provider);
+    loginBtn.onclick = () => signInWithPopup(auth, provider);
+    onAuthStateChanged(auth, (user) => { currentUser = user; if(user) loginBtn.style.display='none'; });
 
-    onAuthStateChanged(auth, (user) => {
-        currentUser = user;
-        if (user && loginBtn) loginBtn.style.display = 'none';
-    });
-
-    // --- UPLOAD ---
+    // EDITOR LOGIC
     const trigger = document.getElementById('post-trigger');
     const input = document.getElementById('video-input');
-    const status = document.getElementById('status-msg');
+    const editor = document.getElementById('editor');
+    const preview = document.getElementById('preview');
 
-    trigger.onclick = () => {
-        if(!currentUser) { signInWithPopup(auth, provider); }
-        else { input.click(); }
+    trigger.onclick = () => { if(!currentUser) signInWithPopup(auth, provider); else input.click(); };
+
+    input.onchange = (e) => {
+        selectedFile = e.target.files[0];
+        if(!selectedFile) return;
+        preview.src = URL.createObjectURL(selectedFile);
+        editor.style.display = 'flex';
     };
 
-    input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        status.innerText = "🚀 Uploading humor...";
+    window.setMusic = (name, el) => {
+        selectedMusic = name;
+        document.querySelectorAll('.music-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+    };
+
+    // FINAL UPLOAD
+    document.getElementById('post-now').onclick = async () => {
+        editor.style.display = 'none';
+        const status = document.getElementById('status-msg');
+        status.innerText = "Uploading vibe...";
         try {
-            const fileName = `videos/${Date.now()}_${file.name}`;
-            const sRef = ref(storage, fileName);
-            const snap = await uploadBytes(sRef, file);
+            const path = `videos/${Date.now()}_${selectedFile.name}`;
+            const sRef = ref(storage, path);
+            const snap = await uploadBytes(sRef, selectedFile);
             const url = await getDownloadURL(snap.ref);
 
             await addDoc(collection(db, "posts"), {
                 videoUrl: url,
-                caption: "New street drop! 😂",
+                music: selectedMusic,
                 username: currentUser.displayName,
                 userImg: currentUser.photoURL,
                 createdAt: new Date()
             });
-            status.innerText = "✅ Live!";
-            setTimeout(() => status.innerText = "", 3000);
-        } catch (err) {
-            status.innerText = "❌ Error uploading.";
-        }
+            status.innerText = "✅ Posted!";
+        } catch (err) { status.innerText = "❌ Failed."; }
     };
 
-    // --- FEED ---
+    // FEED
     const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
     onSnapshot(q, (snapshot) => {
         const feed = document.getElementById('feed');
-        if (snapshot.empty) return;
+        if(snapshot.empty) return;
         feed.innerHTML = '';
         snapshot.forEach((doc) => {
-            const data = doc.data();
+            const d = doc.data();
             const post = document.createElement('div');
             post.className = 'post';
             post.innerHTML = `
-                <video src="${data.videoUrl}" loop playsinline onclick="this.paused ? this.play() : this.pause()"></video>
+                <video src="${d.videoUrl}" loop playsinline onclick="this.paused ? this.play() : this.pause()"></video>
                 <div class="sidebar">
-                    <img src="${data.userImg || ''}" class="user-avatar">
+                    <img src="${d.userImg}" style="width:40px; height:40px; border-radius:50%; border:2px solid var(--accent);">
                     <div class="action-btn">❤️</div>
                     <div class="action-btn">💬</div>
-                    <div class="action-btn">✈️</div>
                 </div>
                 <div class="details">
-                    <div class="username">${data.username}</div>
-                    <div class="caption">${data.caption}</div>
-                </div>
-            `;
+                    <div class="username">${d.username}</div>
+                    <div style="font-size:0.8rem; opacity:0.8;">♫ ${d.music || 'Original Audio'}</div>
+                </div>`;
             feed.appendChild(post);
         });
     });
 
-    // --- PWA ---
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
-    }
+    if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('sw.js')); }
 </script>
 </body>
 </html>
