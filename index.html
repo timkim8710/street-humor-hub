@@ -1,258 +1,142 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Street Humor Hub</title>
-    <style>
-        :root {
-            --glass: rgba(255, 255, 255, 0.1);
-            --border: rgba(255, 255, 255, 0.2);
-            --accent: #00f2ea; 
-            --pink: #ff0050;   
-        }
+/* 1. THE LAYOUT FOUNDATION */
+:root {
+    --glass: rgba(255, 255, 255, 0.1);
+    --border: rgba(255, 255, 255, 0.2);
+    --accent: #00f2ea; /* Neon Teal */
+    --pink: #ff0050;   /* TikTok Pink */
+    --bg-dark: #000000;
+}
 
-        body {
-            margin: 0;
-            background: #000;
-            color: #fff;
-            font-family: -apple-system, sans-serif;
-            display: flex;
-            justify-content: center;
-            overflow: hidden;
-        }
+body {
+    margin: 0;
+    background: var(--bg-dark);
+    color: #fff;
+    font-family: 'Inter', -apple-system, sans-serif;
+    display: flex;
+    justify-content: center;
+    overflow: hidden; /* Stops the browser itself from scrolling */
+}
 
-        /* Container */
-        #app {
-            width: 100%;
-            max-width: 450px;
-            height: 100vh;
-            position: relative;
-            background: #000;
-            border-left: 1px solid var(--border);
-            border-right: 1px solid var(--border);
-        }
+/* 2. THE APP FRAME (Mobile View) */
+#app {
+    width: 100%;
+    max-width: 450px; /* Locks it to a phone-sized width on desktops */
+    height: 100vh;
+    position: relative;
+    background: #000;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+}
 
-        /* Feed Snapping */
-        #feed {
-            height: 100%;
-            overflow-y: scroll;
-            scroll-snap-type: y mandatory;
-            scrollbar-width: none;
-        }
-        #feed::-webkit-scrollbar { display: none; }
+/* 3. THE SCROLLING ENGINE (TikTok Style) */
+#feed {
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory; /* This is what makes it 'snap' to each video */
+    scrollbar-width: none; 
+}
 
-        .post {
-            height: 100%;
-            width: 100%;
-            scroll-snap-align: start;
-            position: relative;
-            background: #111;
-        }
+#feed::-webkit-scrollbar {
+    display: none; /* Hides scrollbar on Chrome/Safari */
+}
 
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+.post {
+    height: 100%;
+    width: 100%;
+    scroll-snap-align: start; /* Ensures each post starts exactly at the top */
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #111;
+}
 
-        /* UI Overlays */
-        header {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            padding: 20px 0;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            z-index: 10;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-        }
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Stretches the video to fill the screen without gaps */
+}
 
-        .sidebar {
-            position: absolute;
-            right: 12px;
-            bottom: 120px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 5;
-        }
+/* 4. THE SIDEBAR (Instagram Style) */
+.sidebar {
+    position: absolute;
+    right: 12px;
+    bottom: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 10;
+}
 
-        .action-btn {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1.3rem;
-        }
+.action-btn {
+    background: var(--glass);
+    backdrop-filter: blur(12px); /* Creates the 'Glass' effect */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.3rem;
+    transition: transform 0.2s ease;
+}
 
-        .details {
-            position: absolute;
-            bottom: 30px;
-            left: 15px;
-            right: 80px;
-            z-index: 5;
-        }
+.action-btn:active {
+    transform: scale(0.9); /* Subtle feedback when clicked */
+}
 
-        .username { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
+/* 5. TEXT OVERLAYS */
+header {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    padding: 25px 0;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    z-index: 10;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+}
 
-        /* Auth/Upload Controls */
-        .controls {
-            position: absolute;
-            bottom: 85px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 20;
-            text-align: center;
-            width: 100%;
-        }
+.details {
+    position: absolute;
+    bottom: 25px;
+    left: 15px;
+    right: 80px;
+    z-index: 5;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+}
 
-        .btn {
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            text-transform: uppercase;
-        }
+.username {
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 5px;
+}
 
-        #login-btn { background: #fff; color: #000; }
-        #upload-btn { background: var(--accent); color: #000; display: none; margin: 0 auto; }
-        #status-msg { font-size: 0.8rem; margin-top: 8px; color: var(--accent); }
+.caption {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: #f1f1f1;
+}
 
-    </style>
-</head>
-<body>
+/* 6. THE UPLOAD BUTTON */
+.controls {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+}
 
-<div id="app">
-    <header>
-        <span style="border-bottom: 2px solid var(--accent)">Trending</span>
-        <span style="opacity: 0.6">New</span>
-    </header>
-
-    <div id="feed">
-        <div class="post">
-            <div style="padding: 40px; text-align: center; margin-top: 50%;">
-                <h2>Street Humor Hub</h2>
-                <p>Sign in to start posting!</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="controls">
-        <button id="login-btn" class="btn">Sign in with Google</button>
-        
-        <input type="file" id="video-input" accept="video/*" style="display: none;">
-        <button id="upload-btn" class="btn">+ POST HUMOR</button>
-        
-        <div id="status-msg"></div>
-    </div>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyCXArPj4WErtRkb2qfaDueaWZm9tdAbSGI",
-        authDomain: "street-humor-hub.firebaseapp.com",
-        projectId: "street-humor-hub",
-        storageBucket: "street-humor-hub.firebasestorage.app",
-        messagingSenderId: "1010209458338",
-        appId: "1:1010209458338:web:9dafc4376bf5129c3ceffb"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-
-    let currentUser = null;
-
-    // --- AUTH LOGIC ---
-    document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
-
-    onAuthStateChanged(auth, (user) => {
-        const loginBtn = document.getElementById('login-btn');
-        const uploadBtn = document.getElementById('upload-btn');
-        if (user) {
-            currentUser = user;
-            loginBtn.style.display = 'none';
-            uploadBtn.style.display = 'block';
-        } else {
-            loginBtn.style.display = 'block';
-            uploadBtn.style.display = 'none';
-        }
-    });
-
-    // --- UPLOAD LOGIC ---
-    const fileInput = document.getElementById('video-input');
-    const uploadBtn = document.getElementById('upload-btn');
-    const status = document.getElementById('status-msg');
-
-    uploadBtn.onclick = () => fileInput.click();
-
-    fileInput.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file || !currentUser) return;
-
-        status.innerText = "Uploading street humor...";
-        try {
-            const fileName = `videos/${Date.now()}_${file.name}`;
-            const storageRef = ref(storage, fileName);
-            const snapshot = await uploadBytes(storageRef, file);
-            const url = await getDownloadURL(snapshot.ref);
-
-            await addDoc(collection(db, "posts"), {
-                videoUrl: url,
-                caption: "New drop! 😂 #street_humor",
-                username: currentUser.displayName,
-                createdAt: new Date()
-            });
-            status.innerText = "Post Live!";
-        } catch (err) {
-            console.error(err);
-            status.innerText = "Upload failed.";
-        }
-    };
-
-    // --- FEED LOGIC ---
-    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-    onSnapshot(q, (snapshot) => {
-        const feed = document.getElementById('feed');
-        if (snapshot.empty) return;
-        
-        feed.innerHTML = '';
-        snapshot.forEach((doc) => {
-            const data = doc.data();
-            const post = document.createElement('div');
-            post.className = 'post';
-            post.innerHTML = `
-                <video src="${data.videoUrl}" loop playsinline onclick="this.paused ? this.play() : this.pause()"></video>
-                <div class="sidebar">
-                    <div class="action-btn">❤️</div>
-                    <div class="action-btn">💬</div>
-                    <div class="action-btn">✈️</div>
-                </div>
-                <div class="details">
-                    <div class="username">@${data.username.replace(/\s+/g, '').toLowerCase()}</div>
-                    <div class="caption">${data.caption}</div>
-                </div>
-            `;
-            feed.appendChild(post);
-        });
-    });
-</script>
-
-</body>
-</html>
+.btn-main {
+    background: linear-gradient(45deg, var(--accent), var(--pink));
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
