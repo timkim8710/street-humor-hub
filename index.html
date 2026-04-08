@@ -22,7 +22,7 @@
             overflow: hidden;
         }
 
-        /* Main Container */
+        /* Container */
         #app {
             width: 100%;
             max-width: 450px;
@@ -33,7 +33,30 @@
             border-right: 1px solid var(--border);
         }
 
-        /* Header */
+        /* Feed Snapping */
+        #feed {
+            height: 100%;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scrollbar-width: none;
+        }
+        #feed::-webkit-scrollbar { display: none; }
+
+        .post {
+            height: 100%;
+            width: 100%;
+            scroll-snap-align: start;
+            position: relative;
+            background: #111;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* UI Overlays */
         header {
             position: absolute;
             top: 0;
@@ -46,39 +69,9 @@
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
         }
 
-        header span { font-weight: bold; opacity: 0.7; cursor: pointer; }
-        header span.active { opacity: 1; border-bottom: 2px solid var(--accent); }
-
-        /* The Feed */
-        #feed {
-            height: 100%;
-            overflow-y: scroll;
-            scroll-snap-type: y mandatory;
-            scrollbar-width: none; /* Hide scrollbar */
-        }
-        #feed::-webkit-scrollbar { display: none; }
-
-        .post {
-            height: 100%;
-            width: 100%;
-            scroll-snap-align: start;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #111;
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* Interaction Sidebar */
         .sidebar {
             position: absolute;
-            right: 10px;
+            right: 12px;
             bottom: 120px;
             display: flex;
             flex-direction: column;
@@ -90,76 +83,75 @@
             background: var(--glass);
             backdrop-filter: blur(10px);
             border: 1px solid var(--border);
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
         }
 
-        /* Bottom Info */
         .details {
             position: absolute;
             bottom: 30px;
             left: 15px;
-            right: 70px;
+            right: 80px;
             z-index: 5;
         }
 
-        .username { font-weight: bold; margin-bottom: 5px; color: var(--accent); }
-        .caption { font-size: 0.95rem; line-height: 1.3; }
+        .username { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
 
-        /* Upload UI */
-        .upload-area {
+        /* Auth/Upload Controls */
+        .controls {
             position: absolute;
-            bottom: 80px;
+            bottom: 85px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 20;
             text-align: center;
+            width: 100%;
         }
 
-        #upload-btn {
-            background: var(--accent);
-            color: #000;
-            border: none;
-            padding: 10px 25px;
+        .btn {
+            padding: 12px 25px;
             border-radius: 30px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 242, 234, 0.3);
+            border: none;
+            text-transform: uppercase;
         }
 
-        #status-msg {
-            font-size: 0.8rem;
-            margin-top: 5px;
-            text-shadow: 1px 1px 2px #000;
-        }
+        #login-btn { background: #fff; color: #000; }
+        #upload-btn { background: var(--accent); color: #000; display: none; margin: 0 auto; }
+        #status-msg { font-size: 0.8rem; margin-top: 8px; color: var(--accent); }
+
     </style>
 </head>
 <body>
 
 <div id="app">
     <header>
-        <span class="active">Street Humor</span>
-        <span>Following</span>
+        <span style="border-bottom: 2px solid var(--accent)">Trending</span>
+        <span style="opacity: 0.6">New</span>
     </header>
 
     <div id="feed">
         <div class="post">
-            <div style="padding: 20px; text-align: center;">
-                <h3>Welcome to the Hub!</h3>
-                <p>Upload a video to start the street humor vibes.</p>
+            <div style="padding: 40px; text-align: center; margin-top: 50%;">
+                <h2>Street Humor Hub</h2>
+                <p>Sign in to start posting!</p>
             </div>
         </div>
     </div>
 
-    <div class="upload-area">
+    <div class="controls">
+        <button id="login-btn" class="btn">Sign in with Google</button>
+        
         <input type="file" id="video-input" accept="video/*" style="display: none;">
-        <button id="upload-btn" onclick="document.getElementById('video-input').click()">+ POST HUMOR</button>
+        <button id="upload-btn" class="btn">+ POST HUMOR</button>
+        
         <div id="status-msg"></div>
     </div>
 </div>
@@ -168,12 +160,11 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // Your actual Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyCXArPj4WErtRkb2qfaDueaWZm9tdAbSGI",
         authDomain: "street-humor-hub.firebaseapp.com",
-        databaseURL: "https://street-humor-hub-default-rtdb.firebaseio.com",
         projectId: "street-humor-hub",
         storageBucket: "street-humor-hub.firebasestorage.app",
         messagingSenderId: "1010209458338",
@@ -183,61 +174,82 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
-    // 1. Upload Logic
-    document.getElementById('video-input').addEventListener('change', async (e) => {
+    let currentUser = null;
+
+    // --- AUTH LOGIC ---
+    document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
+
+    onAuthStateChanged(auth, (user) => {
+        const loginBtn = document.getElementById('login-btn');
+        const uploadBtn = document.getElementById('upload-btn');
+        if (user) {
+            currentUser = user;
+            loginBtn.style.display = 'none';
+            uploadBtn.style.display = 'block';
+        } else {
+            loginBtn.style.display = 'block';
+            uploadBtn.style.display = 'none';
+        }
+    });
+
+    // --- UPLOAD LOGIC ---
+    const fileInput = document.getElementById('video-input');
+    const uploadBtn = document.getElementById('upload-btn');
+    const status = document.getElementById('status-msg');
+
+    uploadBtn.onclick = () => fileInput.click();
+
+    fileInput.onchange = async (e) => {
         const file = e.target.files[0];
-        if (!file) return;
+        if (!file || !currentUser) return;
 
-        const status = document.getElementById('status-msg');
-        status.innerText = "Uploading...";
-
+        status.innerText = "Uploading street humor...";
         try {
-            const fileName = Date.now() + "_" + file.name;
-            const storageRef = ref(storage, 'videos/' + fileName);
+            const fileName = `videos/${Date.now()}_${file.name}`;
+            const storageRef = ref(storage, fileName);
             const snapshot = await uploadBytes(storageRef, file);
             const url = await getDownloadURL(snapshot.ref);
 
             await addDoc(collection(db, "posts"), {
                 videoUrl: url,
-                caption: "New street humor drop! 😂 #merumaua",
+                caption: "New drop! 😂 #street_humor",
+                username: currentUser.displayName,
                 createdAt: new Date()
             });
-
-            status.innerText = "Success! Scroll down.";
+            status.innerText = "Post Live!";
         } catch (err) {
             console.error(err);
-            status.innerText = "Error uploading.";
+            status.innerText = "Upload failed.";
         }
-    });
+    };
 
-    // 2. Load Feed Logic
+    // --- FEED LOGIC ---
     const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
     onSnapshot(q, (snapshot) => {
         const feed = document.getElementById('feed');
-        feed.innerHTML = ''; // Clear for fresh load
+        if (snapshot.empty) return;
         
+        feed.innerHTML = '';
         snapshot.forEach((doc) => {
             const data = doc.data();
             const post = document.createElement('div');
             post.className = 'post';
             post.innerHTML = `
-                <video src="${data.videoUrl}" loop muted playsinline onclick="this.paused ? this.play() : this.pause()"></video>
+                <video src="${data.videoUrl}" loop playsinline onclick="this.paused ? this.play() : this.pause()"></video>
                 <div class="sidebar">
                     <div class="action-btn">❤️</div>
                     <div class="action-btn">💬</div>
                     <div class="action-btn">✈️</div>
                 </div>
                 <div class="details">
-                    <div class="username">@street_humor</div>
+                    <div class="username">@${data.username.replace(/\s+/g, '').toLowerCase()}</div>
                     <div class="caption">${data.caption}</div>
                 </div>
             `;
             feed.appendChild(post);
-            
-            // Auto-play the first video found
-            const firstVideo = post.querySelector('video');
-            if (feed.children.length === 1) firstVideo.play().catch(() => {});
         });
     });
 </script>
