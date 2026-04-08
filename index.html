@@ -6,190 +6,134 @@
     <title>Street Humor Hub</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#00f2ea">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1169/1169944.png">
     
     <style>
         :root {
             --glass: rgba(255, 255, 255, 0.15);
-            --border: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.12);
             --accent: #00f2ea; 
             --pink: #ff0050;   
             --ig-dark: #121212;
         }
 
         body {
-            margin: 0;
-            background: #000;
-            color: #fff;
+            margin: 0; background: #000; color: #fff;
             font-family: -apple-system, system-ui, sans-serif;
-            display: flex;
-            justify-content: center;
-            overflow: hidden;
-            height: 100vh;
+            display: flex; justify-content: center; overflow: hidden; height: 100vh;
         }
 
         #app {
-            width: 100%;
-            max-width: 450px;
-            height: 100vh;
-            position: relative;
-            background: #000;
-            display: flex;
-            flex-direction: column;
+            width: 100%; max-width: 450px; height: 100vh;
+            position: relative; background: #000; display: flex; flex-direction: column;
         }
 
-        /* Feed Snapping */
+        /* Feed Engine */
         #feed {
-            flex: 1;
-            overflow-y: scroll;
-            scroll-snap-type: y mandatory;
-            scrollbar-width: none;
+            flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none;
         }
         #feed::-webkit-scrollbar { display: none; }
 
         .post {
-            height: 100vh;
-            width: 100%;
-            scroll-snap-align: start;
-            position: relative;
-            background: var(--ig-dark);
+            height: 100vh; width: 100%; scroll-snap-align: start;
+            position: relative; background: var(--ig-dark);
         }
 
         video { width: 100%; height: 100%; object-fit: cover; }
 
         /* Overlays */
         header {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            padding: 45px 0 20px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            z-index: 10;
+            position: absolute; top: 0; width: 100%; padding: 50px 0 20px;
+            display: flex; justify-content: center; gap: 20px; z-index: 10;
             background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
         }
 
+        header span { font-weight: 600; font-size: 0.9rem; opacity: 0.6; }
+        header span.active { opacity: 1; border-bottom: 2px solid #fff; }
+
         .sidebar {
-            position: absolute;
-            right: 12px;
-            bottom: 160px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            z-index: 5;
-            align-items: center;
+            position: absolute; right: 12px; bottom: 170px;
+            display: flex; flex-direction: column; gap: 20px; z-index: 5;
         }
 
         .action-btn {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--border);
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
+            background: var(--glass); backdrop-filter: blur(15px);
+            border: 1px solid var(--border); width: 48px; height: 48px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
         }
 
-        .details {
-            position: absolute;
-            bottom: 100px;
-            left: 15px;
-            right: 80px;
-            z-index: 5;
-        }
-
-        .username { font-weight: 700; color: var(--accent); }
+        .details { position: absolute; bottom: 110px; left: 15px; right: 80px; z-index: 5; }
+        .username { font-weight: 700; color: var(--accent); margin-bottom: 5px; }
 
         /* Bottom Nav */
         .bottom-nav {
-            height: 75px;
-            background: #000;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid var(--border);
-            z-index: 20;
+            height: 80px; background: #000; display: flex;
+            justify-content: space-around; align-items: center; border-top: 1px solid var(--border); z-index: 20;
         }
 
+        .nav-item { font-size: 1.5rem; cursor: pointer; opacity: 0.8; }
         .center-post {
             background: linear-gradient(to right, var(--accent), var(--pink));
-            width: 42px;
-            height: 28px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #000;
-            font-weight: 900;
+            width: 45px; height: 30px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900;
         }
 
-        /* Editor Overlay */
-        #editor {
-            display: none;
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 100;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+        /* Editor & AI Overlays */
+        .full-overlay {
+            display: none; position: absolute; inset: 0;
+            background: rgba(0,0,0,0.95); z-index: 100;
+            flex-direction: column; align-items: center; justify-content: center; padding: 20px;
         }
 
-        .music-chip {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            padding: 10px 20px;
-            border-radius: 20px;
-            margin: 5px;
-            cursor: pointer;
-        }
-
-        .music-chip.active { background: var(--accent); color: #000; }
-
+        #ai-messages { flex: 1; overflow-y: auto; width: 100%; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .ai-bubble { background: var(--glass); padding: 10px; border-radius: 12px; align-self: flex-start; max-width: 80%; }
+        .user-bubble { background: var(--accent); color: #000; padding: 10px; border-radius: 12px; align-self: flex-end; max-width: 80%; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <header>
-        <span class="active">Humor</span>
-        <span style="opacity: 0.5;">Fresh</span>
-    </header>
+    <header><span class="active">Humor</span><span>Following</span></header>
 
     <div id="feed">
         <div class="post">
             <div style="padding: 50px; text-align: center; margin-top: 50%;">
-                <h2>Street Humor Hub</h2>
-                <button id="login-btn" style="padding: 10px 20px; border-radius: 20px; background: #fff; color: #000; border: none; font-weight: bold;">Sign In</button>
+                <h2 style="color:var(--accent)">Street Humor Hub</h2>
+                <button id="login-btn" style="padding:12px 24px; border-radius:25px; border:none; font-weight:bold; cursor:pointer">Sign In with Google</button>
             </div>
         </div>
     </div>
 
-    <div id="editor">
-        <h3 style="color: var(--accent);">Edit Vibe</h3>
-        <video id="preview" style="width: 200px; height: 320px; border-radius: 12px; object-fit: cover;" muted autoplay loop></video>
-        <div style="display: flex; flex-wrap: wrap; justify-content: center; margin: 20px 0;">
-            <div class="music-chip active" onclick="setMusic('None', this)">No Music</div>
-            <div class="music-chip" onclick="setMusic('Meru Drill', this)">🔥 Meru Drill</div>
-            <div class="music-chip" onclick="setMusic('Maua Flow', this)">🎤 Maua Flow</div>
+    <div id="editor" class="full-overlay">
+        <h3 style="color:var(--accent)">Edit Vibe</h3>
+        <video id="preview" style="width:200px; height:320px; border-radius:15px; object-fit:cover" muted autoplay loop></video>
+        <div style="margin: 20px 0;">
+            <button onclick="setMusic('Meru Drill')" style="padding:10px; border-radius:15px; border:1px solid var(--accent); background:none; color:#fff">🔥 Meru Drill</button>
+            <button onclick="setMusic('Maua Freestyle')" style="padding:10px; border-radius:15px; border:1px solid var(--accent); background:none; color:#fff">🎤 Maua Freestyle</button>
         </div>
-        <button id="post-now" class="center-post" style="width: 150px; height: 45px; border-radius: 25px;">POST NOW</button>
-        <p onclick="document.getElementById('editor').style.display='none'" style="margin-top: 15px; font-size: 0.9rem; opacity: 0.7;">Cancel</p>
+        <button id="post-now" class="center-post" style="width:140px; height:45px; border-radius:25px">POST NOW</button>
+        <p onclick="closeOverlays()" style="margin-top:20px; opacity:0.6">Cancel</p>
     </div>
 
-    <nav class="bottom-nav">
-        <div>🏠</div>
-        <div id="post-trigger" class="center-post">+</div>
-        <div>👤</div>
-    </nav>
+    <div id="ai-chat" class="full-overlay" style="background: rgba(18,18,18,0.98); backdrop-filter: blur(20px);">
+        <h3 style="color:var(--accent)">Gemini Assistant 🤖</h3>
+        <div id="ai-messages"></div>
+        <div style="width:100%; display:flex; gap:10px; padding:10px;">
+            <input type="text" id="ai-input" placeholder="Ask Gemini..." style="flex:1; padding:12px; border-radius:20px; border:1px solid var(--border); background:none; color:#fff">
+            <button onclick="askGemini()" style="background:var(--accent); border:none; width:45px; height:45px; border-radius:50%">✈️</button>
+        </div>
+        <p onclick="closeOverlays()" style="margin-top:10px; opacity:0.6">Close</p>
+    </div>
 
-    <input type="file" id="video-input" accept="video/*" style="display: none;">
-    <div id="status-msg" style="position: absolute; bottom: 85px; width: 100%; text-align: center; font-size: 0.8rem; color: var(--accent);"></div>
+    <div id="status-msg" style="position:absolute; bottom:90px; width:100%; text-align:center; color:var(--accent); font-size:0.8rem"></div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item">🏠</div>
+        <div class="nav-item" onclick="openAI()">🤖</div>
+        <div class="center-post" id="post-trigger">+</div>
+        <div class="nav-item">🔍</div>
+        <div class="nav-item">👤</div>
+    </nav>
+    <input type="file" id="video-input" accept="video/*" style="display:none">
 </div>
 
 <script type="module">
@@ -212,83 +156,78 @@
     const storage = getStorage(app);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
+    const GEMINI_KEY = "YOUR_GEMINI_API_KEY"; // 👈 REPLACE THIS
 
     let currentUser = null;
     let selectedFile = null;
-    let selectedMusic = "None";
+    let musicVibe = "Original Audio";
 
-    // AUTH
-    const loginBtn = document.getElementById('login-btn');
-    loginBtn.onclick = () => signInWithPopup(auth, provider);
-    onAuthStateChanged(auth, (user) => { currentUser = user; if(user) loginBtn.style.display='none'; });
+    // Auth logic
+    document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
+    onAuthStateChanged(auth, u => { currentUser = u; if(u) document.getElementById('login-btn').style.display='none'; });
 
-    // EDITOR LOGIC
-    const trigger = document.getElementById('post-trigger');
-    const input = document.getElementById('video-input');
-    const editor = document.getElementById('editor');
-    const preview = document.getElementById('preview');
-
-    trigger.onclick = () => { if(!currentUser) signInWithPopup(auth, provider); else input.click(); };
-
-    input.onchange = (e) => {
+    // Upload & Editor
+    document.getElementById('post-trigger').onclick = () => { if(!currentUser) alert("Sign in first!"); else document.getElementById('video-input').click(); };
+    document.getElementById('video-input').onchange = (e) => {
         selectedFile = e.target.files[0];
         if(!selectedFile) return;
-        preview.src = URL.createObjectURL(selectedFile);
-        editor.style.display = 'flex';
+        document.getElementById('preview').src = URL.createObjectURL(selectedFile);
+        document.getElementById('editor').style.display = 'flex';
     };
 
-    window.setMusic = (name, el) => {
-        selectedMusic = name;
-        document.querySelectorAll('.music-chip').forEach(c => c.classList.remove('active'));
-        el.classList.add('active');
-    };
+    window.setMusic = (m) => { musicVibe = m; alert("Selected: " + m); };
+    window.closeOverlays = () => { document.getElementById('editor').style.display = 'none'; document.getElementById('ai-chat').style.display = 'none'; };
 
-    // FINAL UPLOAD
     document.getElementById('post-now').onclick = async () => {
-        editor.style.display = 'none';
+        closeOverlays();
         const status = document.getElementById('status-msg');
-        status.innerText = "Uploading vibe...";
+        status.innerText = "🚀 Posting to the streets...";
         try {
-            const path = `videos/${Date.now()}_${selectedFile.name}`;
-            const sRef = ref(storage, path);
+            const sRef = ref(storage, `videos/${Date.now()}`);
             const snap = await uploadBytes(sRef, selectedFile);
             const url = await getDownloadURL(snap.ref);
-
             await addDoc(collection(db, "posts"), {
-                videoUrl: url,
-                music: selectedMusic,
-                username: currentUser.displayName,
-                userImg: currentUser.photoURL,
-                createdAt: new Date()
+                videoUrl: url, music: musicVibe, username: currentUser.displayName,
+                userImg: currentUser.photoURL, createdAt: new Date()
             });
-            status.innerText = "✅ Posted!";
-        } catch (err) { status.innerText = "❌ Failed."; }
+            status.innerText = "✅ Live!";
+        } catch (e) { status.innerText = "❌ Failed."; }
     };
 
-    // FEED
-    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-    onSnapshot(q, (snapshot) => {
-        const feed = document.getElementById('feed');
-        if(snapshot.empty) return;
-        feed.innerHTML = '';
-        snapshot.forEach((doc) => {
+    // Feed logic
+    onSnapshot(query(collection(db, "posts"), orderBy("createdAt", "desc")), (snap) => {
+        const f = document.getElementById('feed');
+        f.innerHTML = '';
+        snap.forEach(doc => {
             const d = doc.data();
-            const post = document.createElement('div');
-            post.className = 'post';
-            post.innerHTML = `
-                <video src="${d.videoUrl}" loop playsinline onclick="this.paused ? this.play() : this.pause()"></video>
-                <div class="sidebar">
-                    <img src="${d.userImg}" style="width:40px; height:40px; border-radius:50%; border:2px solid var(--accent);">
-                    <div class="action-btn">❤️</div>
-                    <div class="action-btn">💬</div>
-                </div>
-                <div class="details">
-                    <div class="username">${d.username}</div>
-                    <div style="font-size:0.8rem; opacity:0.8;">♫ ${d.music || 'Original Audio'}</div>
-                </div>`;
-            feed.appendChild(post);
+            const p = document.createElement('div');
+            p.className = 'post';
+            p.innerHTML = `
+                <video src="${d.videoUrl}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
+                <div class="sidebar"><img src="${d.userImg}" style="width:45px; height:45px; border-radius:50%; border:2px solid var(--accent)"><div class="action-btn">❤️</div><div class="action-btn">💬</div></div>
+                <div class="details"><div class="username">@${d.username.replace(/\s/g,'')}</div><div style="font-size:0.8rem">♫ ${d.music}</div></div>`;
+            f.appendChild(p);
         });
     });
+
+    // Gemini logic
+    window.openAI = () => document.getElementById('ai-chat').style.display = 'flex';
+    window.askGemini = async () => {
+        const prompt = document.getElementById('ai-input').value;
+        const box = document.getElementById('ai-messages');
+        if(!prompt) return;
+        box.innerHTML += `<div class="user-bubble">${prompt}</div>`;
+        document.getElementById('ai-input').value = '';
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: [{ parts: [{ text: `You are a Kenyan street humor expert. Answer shortly: ${prompt}` }] }] })
+            });
+            const data = await res.json();
+            box.innerHTML += `<div class="ai-bubble">${data.candidates[0].content.parts[0].text}</div>`;
+            box.scrollTop = box.scrollHeight;
+        } catch (e) { console.error(e); }
+    };
 
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('sw.js')); }
 </script>
