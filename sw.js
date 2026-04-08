@@ -1,7 +1,7 @@
-self.addEventListener('install', (event) => {
-  console.log('Street Humor PWA Installed');
+self.addEventListener('install', (e) => {
+  console.log('Street Humor PWA Active');
 });
 
-self.addEventListener('fetch', (event) => {
-  // Required for PWA installation prompt
+self.addEventListener('fetch', (e) => {
+  // Enables installation prompt
 });
